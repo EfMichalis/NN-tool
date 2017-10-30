@@ -276,9 +276,9 @@ class NNtool:
 
     ##START TRAIN ###############################################################
     # Te           :Train frequency measurement
-    # Tb           :Train batch measurement
+    # Tb           :batch frequency measurement
     # TrPrTb       :boolean  for Train Prediction Table
-    # test_predict :boolean for Test
+    # test_predict :boolean for Test measurement
     def TRAIN(self,Epochs,BatchSize,Te=1,test_predict=True,Tb=40,trainrate=1e-4,TrPrTb=True,TsPrTb=True):
         if self.Test_Data==None or self.Test_Hot==None :
             test_predict=False
