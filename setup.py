@@ -1,5 +1,4 @@
 import os
-
 if(not(os.path.exists('CSVRESULTS'))):
     os.makedirs('CSVRESULTS')
 

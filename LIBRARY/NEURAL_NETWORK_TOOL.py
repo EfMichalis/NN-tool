@@ -8,13 +8,24 @@ import csv
 from DATASETS import *
 import tensorflow as tf
 import time
-
+from inspect import stack as InStack
 #START CLASS
 class NNtool:
     def __init__(self,TopologyDir=None,NewWeights=False):
-        if TopologyDir!=None:
+        self.PrDir=None
+        if TopologyDir==None:
+            DirQ=InStack()[1][1][:-6]
+            print('Read from '+DirQ+'_TP'+'?')
+            print('No : 0\nYes : 1')
+            Ans=input()
+            while Ans!="0" and Ans!="1":
+                print('No : 0\nYes : 1')
+                Ans=input()
+            if Ans=="1":
+                self.buildnet(DirQ+'_TP', NewWeights)
+                self.PrDir=DirQ #project Dir
+        else:
             self.buildnet(TopologyDir, NewWeights)
-
     def buildnet(self,TopologyDir,NewWeights=True):
             self.TopologyDir=TopologyDir
             self.NewWeights=NewWeights
@@ -276,9 +287,9 @@ class NNtool:
 
     ##START TRAIN ###############################################################
     # Te           :Train frequency measurement
-    # Tb           :batch frequency measurement
+    # Tb           :Train batch measurement
     # TrPrTb       :boolean  for Train Prediction Table
-    # test_predict :boolean for Test measurement
+    # test_predict :boolean for Test
     def TRAIN(self,Epochs,BatchSize,Te=1,test_predict=True,Tb=40,trainrate=1e-4,TrPrTb=True,TsPrTb=True):
         if self.Test_Data==None or self.Test_Hot==None :
             test_predict=False
@@ -302,7 +313,7 @@ class NNtool:
         Batch_Pos=0 # position index of Train,Hot
         i_batch=0
         self.DictData={}
-        Return_Mess="Lists that returns:\n"
+        Return_Mess="return Lists:\n"
         if Te>0:
             Return_Mess+="Train Epoch (Loss,Accuracy)\n"
             self.DictData['train']={}
@@ -441,9 +452,17 @@ class NNtool:
 
 
     ####START CSV #############################################################
-    # DictDir :name directory
+    # DictDir :name directory for results
     # id      :subdirectory where the train results are saved
-    def SaveDictData(self,DictDir,id):
+    def SaveDictData(self,id,DictDir=None):
+        if DictDir==None:
+            DictDir=self.PrDir+'_RS'
+        elif not(os.path.isdir('../CSVRESULTS/'+DictDir)):
+            os.mkdir('../CSVRESULTS/'+DictDir)
+        if not(os.path.isdir('../CSVRESULTS/'+DictDir+'/'+id)):
+            os.mkdir('../CSVRESULTS/'+DictDir+'/'+id)
+
+
         path='../CSVRESULTS/'+DictDir+'/'+id+'/'
         if 'train' in self.DictData:
             C=csv.writer(open(path+"outputTR.csv",'w'))
@@ -463,13 +482,15 @@ class NNtool:
             if 'test' in self.DictData:
                 self.DictData['test_predict_table'].to_csv(path+'TestPredictionTable.csv', sep=',')
 
-    def LoadCSVtoDict(self,DictDir,id):
+    def LoadCSVtoDict(self,id,DictDir=None):
         def OpenCSV(filename):
             C=csv.reader(open(filename+".csv",'r'))
             L=[]
             for r in C:
                 L.append(r)
             return L
+        if DictDir==None:
+            DictDir=self.PrDir+'_RS'
         path='../CSVRESULTS/'+DictDir+'/'+id+'/'
         self.DictData={}
         if os.system('ls '+path+'outputTR.csv')!=512:  #True

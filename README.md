@@ -131,16 +131,11 @@ Fc(512,tanh);
 Fc(3,softmax);
 ```
 
-This is first traing experiment so we create folder *1*
-``` bush
-NN-Tool$ mkdir CSVRESULTS/IRIS_RS/1
-```
-
 Go to SCRIPTS folder
 ```bush
 NN-Tool$ cd SCRIPTS
 ```
-Open *iris_exmaple.py* we will this first line :
+Open *IRIS_SC.py*,with first line :
 ``` python
 import sys;sys.path.append('../LIBRARY');from NEURAL_NETWORK_TOOL import *
  ```
@@ -152,18 +147,16 @@ Train_Examples,Train_Labels,Test_Examples,Test_Labels,Set_Names=IRISdata()
 ```
 Prepare the model before the training:
 ```python
-Dir="IRIS_TP" #Topology Directory
-Net = NNtool()
-Net.buildnet(Dir)
+Net = NNtool() # Topology Directory  : IRIS_TP
 Net.SetData(Train_Examples,Train_Labels,Test_Examples,Test_Labels,Set_Names)
 Net.SetSession() #Ready up
 ```
 Train Model:
 ```python
 BatchSize=20
-N_Epoch=40
+N_Epoch=25
 
-#Inputs, dont make sence. Read LIBRARY/NEURAL_NETWORK_TOOL.py line 277
+#TRAIN inputs, dont make sence. Read LIBRARY/NEURAL_NETWORK_TOOL.py line 277
 Net.TRAIN(N_Epoch,BatchSize,Tb=3,Te=1,test_predict=True)
 ```
 Save our progress:
@@ -180,13 +173,12 @@ print(Net.DictData['train_predict_table'])
 ```
 Save Results:
 ```python
-Iris_Resultfolder='IRIS_RS'
-experiment_folder='1'
-Net.SaveDictData(Iris_Resultfolder,experiment_folder)
+experiment_folder='1' # This is first traning experiment so we create folder 1
+Net.SaveDictData(experiment_folder) # Results Directory : IRIS_RS
 ```
 If everything is fine we can read the results by the files:
 ```python
-Net.LoadCSVtoDict(Iris_Resultfolder,experiment_folder)
+Net.LoadCSVtoDict(experiment_folder)
 Net.TrainTestPlot()
 Net.DictDataPlot()
 print(Net.DictData['train_predict_table'])
@@ -199,16 +191,15 @@ import sys;sys.path.append('../LIBRARY');from NEURAL_NETWORK_TOOL import *
 # The IRISdata() has Number of Train Examples as input argument
 Train_Examples,Train_Labels,Test_Examples,Test_Labels,Set_Names=IRISdata()
 
-Dir="IRIS_TP" #Topology Directory
-Net = NNtool()
-Net.buildnet(Dir)
+
+Net = NNtool() # Topology Directory  : IRIS_TP
 Net.SetData(Train_Examples,Train_Labels,Test_Examples,Test_Labels,Set_Names)
 Net.SetSession() #Ready up
 
 BatchSize=20
-N_Epoch=40
+N_Epoch=25
 
-#Inputs, dont make sence. Read LIBRARY/NEURAL_NETWORK_TOOL.py line 277
+#TRAIN inputs, dont make sence. Read LIBRARY/NEURAL_NETWORK_TOOL.py line 277
 Net.TRAIN(N_Epoch,BatchSize,Tb=3,Te=1,test_predict=True)
 Net.SaveWeights()
 
@@ -218,16 +209,15 @@ Net.TrainTestPlot()
 Net.DictDataPlot()
 print(Net.DictData['train_predict_table'])
 
-Iris_Resultfolder='IRIS_RS'
-experiment_folder='1'
-Net.SaveDictData(Iris_Resultfolder,experiment_folder)
+experiment_folder='1' # This is first traning experiment so we create folder 1
+Net.SaveDictData(experiment_folder) # Results Directory : IRIS_RS
 
-Net.LoadCSVtoDict(Iris_Resultfolder,experiment_folder)
+Net.LoadCSVtoDict(experiment_folder)
 Net.TrainTestPlot()
 Net.DictDataPlot()
 print(Net.DictData['train_predict_table'])
 ```
-the NN-Tool tree after this example should be like this:
+The NN-Tool tree after this example should be like this:
 ```
 NN-Tool
 ├── CSVRESULTS
