@@ -150,7 +150,7 @@ def LoadCIFAR_10(trn=50000,tsn=10000):
         TestIm,TestLabel=CIFAR_10SetDataANDLabels(Numb,BinFile)
         return TrainIm,TrainLabel,TestIm,TestLabel,Set
 
-
+# CHARS74K : number & capital-char Fonts ,36576 examples
 def chars74k_num_caps_fonts_dawnload(get=True):
 
     if(not(os.path.exists('../DATASETS/CHARS74K_NUM_CAPS_FONTS'))):
@@ -189,9 +189,7 @@ def chars74k_num_caps_fonts_dawnload(get=True):
 
     if get:
         return CHARS74K_NUM_CAPS_FONTS()
-
-
-
+    
 def CHARS74K_NUM_CAPS_FONTS(trn=36576):
     if(not(os.path.exists('../DATASETS/CHARS74K_NUM_CAPS_FONTS'))):
         print('CHARS74K_NUM_CAPS_FONTS dataset doesnt exist')
