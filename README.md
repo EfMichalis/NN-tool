@@ -6,9 +6,7 @@
   2. matplotlib
   3. pandas
   4. tensorflow
-  5. struct
-  6. urllib
-  7. scipy
+  5. scipy
 
 * #### What you can do?
   1. Write the Neural Network Topology in .txt file.
@@ -143,21 +141,19 @@ Read Iris Dataset:
 ``` python
 # 150 Examples, by default 120 Train Examples & 30 Test Examples
 # The IRISdata() has Number of Train Examples as input argument
-Train_Examples,Train_Labels,Test_Examples,Test_Labels,Set_Names=IRISdata()
+Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names = IRISdata()
 ```
 Prepare the model before the training:
 ```python
-Net = NNtool() # Topology Directory  : IRIS_TP
-Net.SetData(Train_Examples,Train_Labels,Test_Examples,Test_Labels,Set_Names)
-Net.SetSession() #Ready up
+Net = NNtool()  # Topology Directory  : IRIS_TP
+Net.SetData(Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names)
+Net.SetSession()  # Ready up
 ```
 Train Model:
 ```python
-BatchSize=20
-N_Epoch=25
-
-#TRAIN inputs, dont make sence. Read LIBRARY/NEURAL_NETWORK_TOOL.py line 277
-Net.TRAIN(N_Epoch,BatchSize,Tb=3,Te=1,test_predict=True)
+BatchSize = 120
+N_Epoch = 25
+Net.TRAIN(N_Epoch, BatchSize, Tb=3, Te=1, test_predict=True)
 ```
 Save our progress:
 ```python
@@ -173,8 +169,9 @@ print(Net.DictData['train_predict_table'])
 ```
 Save Results:
 ```python
-experiment_folder='1' # This is first traning experiment so we create folder 1
-Net.SaveDictData(experiment_folder) # Results Directory : IRIS_RS
+# This is first traning experiment so we create folder 1
+experiment_folder = '1'
+Net.SaveDictData(experiment_folder)  # Results Directory : IRIS_RS
 ```
 If everything is fine we can read the results by the files:
 ```python
@@ -185,33 +182,39 @@ print(Net.DictData['train_predict_table'])
 ```
 Adding all pieces of code:
 ```python
-import sys;sys.path.append('../LIBRARY');from NEURAL_NETWORK_TOOL import *
+import sys; sys.path.append('../LIBRARY'); from NEURAL_NETWORK_TOOL import *
 
+# READ IRIS DATASET ###########################################################
 # 150 Examples, by default 120 Train Examples & 30 Test Examples
 # The IRISdata() has Number of Train Examples as input argument
-Train_Examples,Train_Labels,Test_Examples,Test_Labels,Set_Names=IRISdata()
+Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names = IRISdata()
 
+# PREPARE THE MODEL BEFORE THE TRAINING #######################################
+Net = NNtool()  # Topology Directory  : IRIS_TP
+Net.SetData(Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names)
+Net.SetSession()  # Ready up
 
-Net = NNtool() # Topology Directory  : IRIS_TP
-Net.SetData(Train_Examples,Train_Labels,Test_Examples,Test_Labels,Set_Names)
-Net.SetSession() #Ready up
+# TRAIN MODEL #################################################################
+BatchSize = 120
+N_Epoch = 25
+Net.TRAIN(N_Epoch, BatchSize, Tb=3, Te=1, test_predict=True)
 
-BatchSize=20
-N_Epoch=25
-
-#TRAIN inputs, dont make sence. Read LIBRARY/NEURAL_NETWORK_TOOL.py line 277
-Net.TRAIN(N_Epoch,BatchSize,Tb=3,Te=1,test_predict=True)
+# SAVE OUR PROGRESS ###########################################################
 Net.SaveWeights()
 
+# SHOW RESULTS ################################################################
 Net.PrintTrainLossAccuracy()
 Net.PrintTestLossAccuracy()
 Net.TrainTestPlot()
 Net.DictDataPlot()
 print(Net.DictData['train_predict_table'])
 
-experiment_folder='1' # This is first traning experiment so we create folder 1
-Net.SaveDictData(experiment_folder) # Results Directory : IRIS_RS
+# SAVE RESULTS ################################################################
+# This is first traning experiment so we create folder 1
+experiment_folder = '1'
+Net.SaveDictData(experiment_folder)  # Results Directory : IRIS_RS
 
+# IF EVERYTHING IS FINE WE CAN READ THE RESULTS BY THE FILES ##################
 Net.LoadCSVtoDict(experiment_folder)
 Net.TrainTestPlot()
 Net.DictDataPlot()
