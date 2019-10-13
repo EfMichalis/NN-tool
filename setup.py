@@ -1,19 +1,66 @@
-import os
+"""Packaging settings."""
+
+from codecs import open
+from os.path import abspath, dirname, join
+from subprocess import call
+
+from setuptools import Command, find_packages, setup
+
+from nntool import __version__
 
 
-if(not(os.path.exists('CSVRESULTS'))):
-    os.makedirs('CSVRESULTS')
+this_dir = abspath(dirname(__file__))
+with open(join(this_dir, 'README.rst'), encoding='utf-8') as file:
+    long_description = file.read()
 
-if(not(os.path.exists('DATASETS'))):
-    os.makedirs('DATASETS')
 
-if(not(os.path.exists('SCRIPTS'))):
-    os.makedirs('SCRIPTS')
-
-if(not(os.path.exists('TOPOLOGYS'))):
-    os.makedirs('TOPOLOGYS')
-
-if(not(os.path.exists('newproject.py'))):
-    with open('newproject.py', 'w') as Pyfile:
-        Commants = """import os;PrName=input('Give Project Name: ');SCfile = open('SCRIPTS/'+PrName+'_SC.py','w');SCfile.write("import sys;sys.path.append('../LIBRARY');from NEURAL_NETWORK_TOOL import *");SCfile.close();os.makedirs('TOPOLOGYS/'+PrName+'_TP');os.system('touch TOPOLOGYS/'+PrName+'_TP/topology.txt');os.makedirs('CSVRESULTS/'+PrName+'_RS')"""
-        Pyfile.write(Commants)
+long_description = """
+    Training and view perfomance of Deep Neural Networks with .txt topology file
+    and little piece of code.
+"""
+setup(
+    name='nntool',
+    version=__version__,
+    description='Deep Learning analyzer',
+    long_description=long_description,
+    url='https://github.com/EfMichalis/nntool',
+    author='Efthymis Michalis',
+    author_email='mefthymis@gmail.com',
+    license='UNLICENSE',
+    classifiers=[
+        'Development Status :: 3 - Alpha'
+        'Intended Audience :: Developers',
+        'Intended Audience :: Education',
+        'Intended Audience :: Science/Research',
+        'License :: Public Domain',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
+        'Topic :: Scientific/Engineering :: Mathematics',
+        'Topic :: Scientific/Engineering :: Visualization'
+    ],
+    # keywords = 'cli',
+    packages=['nntool'],
+    package_dir={'nntool': 'nntool'},
+    install_requires=[
+        'docopt',
+        'tensorflow',
+        'scipy',
+        'matplotlib',
+        'pandas',
+        'scikit-image',
+        'numpy'
+    ],
+    entry_points={
+        'console_scripts': [
+            'nntool = nntool.cli:main'
+        ],
+    },
+    test_suite='nose.collector',
+    tests_require=['nose'],
+    # extras_require = {
+    #     'test': ['coverage', 'pytest', 'pytest-cov'],
+    # },
+)

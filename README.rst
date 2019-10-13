@@ -1,4 +1,4 @@
-# NN-Tool
+# nntool
 ## Simple Artificial Neural Network tool written in python3 - Tensorflow
 
 * #### Package Requirements
@@ -12,25 +12,25 @@
   1. Write the Neural Network Topology in .txt file.
   2. View Training & Testing results.
   3. Save Views and Training Progress.
-* #### Why NN-Tool?
+* #### Why nntool?
   1. Simple architectures - *for now*.
   2. Little piece of code - *The reason for the project*.
 * #### Set Up
   1. Clone git
   ```bush
-  $ git clone https://github.com/EfMichalis/NN-Tool
+  $ git clone https://github.com/EfMichalis/nntool
   ```
-  2. Go to NN-Tool folder
+  2. Go to nntool folder
   ```bush
-  $ cd path/to/NN-Tool
+  $ cd path/to/nntool
   ```
   3. Run  *setup.py*
   ```bush
-  NN-Tool$ python3 setup.py
+  nntool$ python3 setup.py
   ```
-* #### NN-Tool Structure
+* #### nntool Structure
   ```
-    NN-Tool
+    nntool
     ├── CSVRESULTS
     ├── DATASETS
     ├── LIBRARY
@@ -92,7 +92,7 @@ Syndax rules:
           <li> <i>DROPOUT ,where the last non-dropout is one of the above</i> </li>
         </ol>
       </li>
-      <li> <i>This expression must be natural number: <br>(This_Layer_X_size+1-Conv_X_size)/Pool_X_size, where, if next layer is CONVOLUTIONAL then Pool_X_size=1 or if next layer is POOLING then Conv_X_size=1<br>To culculate the sizes by the hand for valid topology start from the INPUT's sizes</i> <b>(This expression is calculated only for CONVOLUTIONAL and POOLING Layers.If the next layer is FULL CONNECTED then NN-Tool is flattening the current layer)</b>
+      <li> <i>This expression must be natural number: <br>(This_Layer_X_size+1-Conv_X_size)/Pool_X_size, where, if next layer is CONVOLUTIONAL then Pool_X_size=1 or if next layer is POOLING then Conv_X_size=1<br>To culculate the sizes by the hand for valid topology start from the INPUT's sizes</i> <b>(This expression is calculated only for CONVOLUTIONAL and POOLING Layers.If the next layer is FULL CONNECTED then nntool is flattening the current layer)</b>
       </li>
 </li>
 
@@ -101,11 +101,11 @@ Syndax rules:
 We use [Iris Dataset](https://en.wikipedia.org/wiki/Iris_flower_data_set), every example is a 1D vector size 4 and the number of classes is 3.<br><br>
 Create new Project and give **IRIS** as project name:
 ``` bush
-NN-Tool$ python3 newproject.py
+nntool$ python3 newproject.py
 Give Project Name: IRIS
 ```
 ```bush
-NN-Tool
+nntool
 ├── CSVRESULTS
 |   └──IRIS_RS
 ├── DATASETS
@@ -131,7 +131,7 @@ Fc(3,softmax);
 
 Go to SCRIPTS folder
 ```bush
-NN-Tool$ cd SCRIPTS
+nntool$ cd SCRIPTS
 ```
 Open *IRIS_SC.py*,with first line :
 ``` python
@@ -220,9 +220,9 @@ Net.TrainTestPlot()
 Net.DictDataPlot()
 print(Net.DictData['train_predict_table'])
 ```
-The NN-Tool tree after this example should be like this:
+The nntool tree after this example should be like this:
 ```
-NN-Tool
+nntool
 ├── CSVRESULTS
 │   └── IRIS_RS
 │       └── 1
