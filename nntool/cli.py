@@ -3,7 +3,7 @@ nntool
 
 Usage:
     nntool create_project <name>
-    nntool train --topology <name> --dataset <name> --epoches <number>
+    nntool train --topology <name> --dataset <name> --epoches <number> [--regularization]
     nntool -h | --help
     nntool --version
 
@@ -31,7 +31,7 @@ def main():
     options = docopt(__doc__, version=VERSION)
     if options['create_project'] is True and options['<name>'] is not None:
         pr_name = options['<name>'][0]
-        os.makedirs(pr_name+'/topologys')
+        os.makedirs(pr_name+'/weights')
         os.makedirs(pr_name+'/scripts')
         os.makedirs(pr_name+'/csvresults')
         os.makedirs(pr_name+'/.DATASETS')
@@ -41,18 +41,19 @@ def main():
         if data_name=='iris':
             Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names =iris()
         elif data_name=='mnist':
-            pass
+            Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names =mnist()
         elif data_name=='cfar10':
-            pass
+            Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names =cifar10()
         elif data_name=='chars74k':
-            pass
+            Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names =chars74k_num_caps_fonts()
         else:
             assert 1==0, 'not find dataset'
         trainer.SetData(Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names)
         trainer.SetSession()
         BatchSize = 120
         N_Epoch = int(options['<number>'])
-        trainer.TRAIN(N_Epoch, BatchSize, Tb=3, Te=1, test_predict=True)
+        regularization=bool(options['--regularization'])
+        trainer.TRAIN(N_Epoch, BatchSize, Tb=3, Te=1, test_predict=True,regularization=regularization)
         trainer.save_weights()
 
 

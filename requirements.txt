@@ -1,2 +1,2 @@
 docopt
-tensorflow
+tensorflow>=1,<2

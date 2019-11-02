@@ -4,8 +4,7 @@ from struct import *
 import os
 import urllib.request
 import matplotlib.image as mpimg
-# from scipy.misc import imresize
-from skimage.transform import resize
+from scipy.misc import imresize
 import random
 
 
@@ -212,8 +211,7 @@ def chars74k_num_caps_fonts_dawnload(get=True):
             for D in DataList:
                 Class = int(D[0][-3:]) - 1
                 img = mpimg.imread(D[1])
-                # img = imresize(img, (28, 28), 'bicubic')
-                img = resize(img,(28,28))
+                img = imresize(img, (28, 28), 'bicubic')
                 img = img.reshape(784).tolist()
                 BinWrite.write(pack('%sB' % 1, *[Class]))
                 BinWrite.write(pack('%sB' % 784, *img))

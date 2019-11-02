@@ -288,7 +288,7 @@ class Trainer:
     # Tb           :Train batch measurement
     # TrPrTb       :boolean  for Train Prediction Table
     # test_predict :boolean for Test
-    def TRAIN(self, Epochs, BatchSize, Te=1, test_predict=True, Tb=40, trainrate=1e-4, TrPrTb=True, TsPrTb=True):
+    def TRAIN(self, Epochs, BatchSize, Te=1, test_predict=True, Tb=40, trainrate=1e-4, TrPrTb=True, TsPrTb=True,regularization=False):
         if self.Test_Data is None or self.Test_Hot is None:
             test_predict = False
             TsPrTb = False
@@ -298,8 +298,9 @@ class Trainer:
             CE = tf.reduce_mean(-tf.reduce_sum(self.y_*tf.log(self.Layers[-1]+1e-12), reduction_indices=[1]))
             ### l-2 ####
             reg = 0
-            for W in self.Weights:
-                reg += tf.nn.l2_loss(W)
+            if regularization:
+                for W in self.Weights:
+                    reg += tf.nn.l2_loss(W)
             CE = tf.reduce_mean(CE+0.01*reg)
             self.train_step = tf.train.AdamOptimizer(learning_rate=trainrate).minimize(CE)
             self.Initialize_Vars()
