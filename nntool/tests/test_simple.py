@@ -8,7 +8,7 @@ class Test_simple(unittest.TestCase):
 
     
     def test_trainer_train(self):
-            trainer = Trainer('top1.txt')
+            trainer = Trainer('top.txt')
             Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names =mnist()
             
             trainer.SetData(Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names)
