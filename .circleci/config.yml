@@ -30,10 +30,10 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install --upgrade pip
-            pip install -e .
+            python3 -m venv venv;
+            . venv/bin/activate;
+            pip install --upgrade pip;
+            pip install -e .;
       - save_cache:
           paths:
             - ./venv
@@ -47,8 +47,8 @@ jobs:
       - run:
           name: create topology cnn
           command: |
-          mkdir .DATASETS
-          printf "Input(28,28,1);\nConv(32,5,tanh);\nPool(2,max);\nConv(64,3,relu);\nPool(2,max);\nDropout(50);\nConv(128,2,tanh);\nPool(2,max);\nFc(1024,relu);\nDropout(50);\nFc(10,softmax);">top.txt
+            mkdir .DATASETS;
+            printf "Input(28,28,1);\nConv(32,5,tanh);\nPool(2,max);\nConv(64,3,relu);\nPool(2,max);\nDropout(50);\nConv(128,2,tanh);\nPool(2,max);\nFc(1024,relu);\nDropout(50);\nFc(10,softmax);">top.txt;
       
       - store_artifacts:
           path: ~/repo/.DATASETS
