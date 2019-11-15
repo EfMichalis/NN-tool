@@ -4,7 +4,7 @@ from nntool.datasets import mnist
 
 class Test_simple(unittest.TestCase):
     def test_trainer_init(self):
-        self.failUnlessRaises(Exception, Trainer('top1.txt'))
+        self.failUnlessRaises(Exception, Trainer('top.txt'))
 
     
     def test_trainer_train(self):
