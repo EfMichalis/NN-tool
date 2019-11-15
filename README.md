@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/EfMichalis/NN-Tool.svg?style=svg)](https://circleci.com/gh/EfMichalis/NN-Tool)
+
 # nntool
 ## Artificial neural networks Freamwork in python3 to read txt file
 
