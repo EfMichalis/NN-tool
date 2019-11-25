@@ -3,7 +3,7 @@ nntool
 
 Usage:
     nntool create_project <name>
-    nntool train --topology <name> --dataset <name> --epoches <number> [--regularization]
+    nntool train --topology <name> --dataset <name> --epoches <number> --batchsize <number> [--regularization]
     nntool -h | --help
     nntool --version
 
@@ -13,7 +13,7 @@ Options:
 
 Examples:
     nntool create_project project1
-    nntool --train --topology top.txt --dataset iris
+    nntool train --topology top.txt --dataset iris --epoches 200 --batchsize 120 --regularization
 """
 
 
@@ -38,26 +38,23 @@ def main():
     elif options['train'] and options['--topology'] and options['--dataset'] and options['<name>'] is not None:
         trainer = Trainer(options['<name>'][0])
         data_name=options['<name>'][1]
+        dsets = datasets()
         if data_name=='iris':
-            Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names =iris()
+            Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names = dsets.iris()
         elif data_name=='mnist':
-            Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names =mnist()
+            Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names = dsets.mnist()
         elif data_name=='cfar10':
-            Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names =cifar10()
+            Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names = dsets.cifar10()
         elif data_name=='chars74k':
-            Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names =chars74k_num_caps_fonts()
+            Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names = dsets.chars74k_num_caps_fonts()
+        elif data_name=='fashion_mnist':
+            Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names = dsets.fashion_mnist()
         else:
             assert 1==0, 'not find dataset'
         trainer.SetData(Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names)
         trainer.SetSession()
-        BatchSize = 120
-        N_Epoch = int(options['<number>'])
+        N_Epoch = int(options['<number>'][0])
+        BatchSize = int(options['<number>'][1])
         regularization=bool(options['--regularization'])
         trainer.TRAIN(N_Epoch, BatchSize, Tb=3, Te=1, test_predict=True,regularization=regularization)
         trainer.save_weights()
-
-
-
-
-
-

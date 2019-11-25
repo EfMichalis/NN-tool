@@ -259,7 +259,7 @@ class Trainer:
     # Check if layer syndax ends with ';'
     def CheckEnd(self, Stri):
         if Stri.find(');') != len(Stri)-2:
-            sys.exit(Strii+"  Error")
+            sys.exit(Stri+"  Error")
 
     # PoolSize=1 if new layer is Convolutional , ConvSize=1 if new layer is Pooling
     def HiSize(self, ConvSize=1, PoolSize=1):
@@ -286,12 +286,13 @@ class Trainer:
     # START TRAIN #############################################################
     # Te           :Train frequency measurement
     # Tb           :Train batch measurement
-    # TrPrTb       :boolean  for Train Prediction Table
-    # test_predict :boolean for Test
-    def TRAIN(self, Epochs, BatchSize, Te=1, test_predict=True, Tb=40, trainrate=1e-4, TrPrTb=True, TsPrTb=True,regularization=False):
+    # TrCMatrix    :boolean for Train Confusion Matrix
+    # TsCMatrix    :boolean for Test Confusion Matrix
+    # test_predict :boolean for Test eval
+    def TRAIN(self, Epochs, BatchSize, Te=1, test_predict=True, Tb=40, trainrate=1e-4, TrCMatrix=True, TsCMatrix=True,regularization=False):
         if self.Test_Data is None or self.Test_Hot is None:
             test_predict = False
-            TsPrTb = False
+            TsCMatrix = False
         if Te == 0:
             test_predict = False
         if self.NetworkNewTrainig:
@@ -302,7 +303,8 @@ class Trainer:
                 for W in self.Weights:
                     reg += tf.nn.l2_loss(W)
             CE = tf.reduce_mean(CE+0.01*reg)
-            self.train_step = tf.train.AdamOptimizer(learning_rate=trainrate).minimize(CE)
+            self.opt = tf.train.AdamOptimizer(learning_rate=trainrate)
+            self.train_step = self.opt.minimize(CE)
             self.Initialize_Vars()
             print("#############################################")
             print("#### All tf Variables has been initialized. #")
@@ -375,12 +377,12 @@ class Trainer:
                 i_batch = 0
                 Batch_Pos = 0
                 E_time = time.time()
-        if TrPrTb:
-            Return_Mess += "Train Prediction Table\n"
-            self.DictData['train_predict_table'] = self.PredictionTable(self.Train_Data, self.Train_Hot)
-        if TsPrTb:
-            Return_Mess += "Test Prediction Table\n"
-            self.DictData['test_predict_table'] = self.PredictionTable(self.Test_Data, self.Test_Hot)
+        if TrCMatrix:
+            Return_Mess += "Train Confusion Matrix\n"
+            self.DictData['train_confusion_matrix'] = self.ConfusionMatrix(self.Train_Data, self.Train_Hot)
+        if TsCMatrix:
+            Return_Mess += "Test Confusion Matrix\n"
+            self.DictData['test_confusion_matrix'] = self.ConfusionMatrix(self.Test_Data, self.Test_Hot)
         print(Return_Mess)
     # END TRAIN ###############################################################
     # START TRAIN RUSULTS #####################################################
@@ -429,7 +431,7 @@ class Trainer:
             Total_Loss = (Total_Loss*i+loss)/(i+1)  # update total Loss
         return Total_Loss
 
-    def PredictionTable(self, Data, Label):
+    def ConfusionMatrix(self, Data, Label):
         Table = np.zeros((len(self.Set_Names), len(self.Set_Names))).astype(int)
         Pop = np.zeros((len(self.Set_Names)))
         for tr in range(Data.shape[0]):
@@ -478,10 +480,10 @@ class Trainer:
             C.writerow(self.DictData['batch']['loss'])
             C.writerow(self.DictData['batch']['accuracy'])
             C.writerow([self.DictData['batch']['info']['batchsize'], self.DictData['batch']['info']['batchfreq']])
-        if 'train_predict_table' in self.DictData:
-            self.DictData['train_predict_table'].to_csv(path+'TrainPredictionTable.csv', sep=',')
+        if 'train_confusion_matrix' in self.DictData:
+            self.DictData['train_confusion_matrix'].to_csv(path+'TrainConfusionMatrix.csv', sep=',')
             if 'test' in self.DictData:
-                self.DictData['test_predict_table'].to_csv(path+'TestPredictionTable.csv', sep=',')
+                self.DictData['test_confusion_matrix'].to_csv(path+'TestConfusionMatrix.csv', sep=',')
 
     def LoadCSVtoDict(self, id, DictDir=None):
         def OpenCSV(filename):
@@ -504,10 +506,10 @@ class Trainer:
             self.DictData['batch'] = {}
             self.DictData['batch']['loss'], self.DictData['batch']['accuracy'], self.DictData['batch']['info'] = OpenCSV(path+'outputB')
             self.DictData['batch']['info'] = {'batchsize': self.DictData['batch']['info'][0], 'batchfreq': self.DictData['batch']['info'][1]}
-        if os.system('ls '+path+'TrainPredictionTable.csv') != 512:
-            self.DictData['train_predict_table'] = DF.from_csv(path+'TrainPredictionTable.csv')
-        if os.system('ls '+path+'TestPredictionTable.csv') != 512:
-            self.DictData['test_predict_table'] = DF.from_csv(path+'TestPredictionTable.csv')
+        if os.system('ls '+path+'TrainConfusionMatrix.csv') != 512:
+            self.DictData['train_confusion_matrix'] = DF.from_csv(path+'TrainConfusionMatrix.csv')
+        if os.system('ls '+path+'TestConfusionMatrix.csv') != 512:
+            self.DictData['test_confusion_matrix'] = DF.from_csv(path+'TestConfusionMatrix.csv')
 
     # END CSV #################################################################
     # START VISUALIZATION #####################################################
