@@ -41,7 +41,8 @@ class Trainer:
                 # Open Weights Binary Files
                 self.Weights_Bin_File = open('weights/Weights.Bin', 'br')
                 self.Bias_Bin_File = open('weights/Bias.Bin', 'br')
-
+                self.ScaleFile = open('weights/Scale.Bin','br')
+                self.BetaFile = open('weights/Beta.Bin','br')
             if os.system('ls '+self.topology_file) == 512:
                 sys.exit("Not find topology.txt file")
             self.readfile()
@@ -59,10 +60,12 @@ class Trainer:
             self.DroupoutCnt = 0
             self.DroupoutsProbabilitys = np.array([])  # Storing for trainig processing
             self.keep_prob = tf.placeholder(tf.float32)  # During the trainig processing, the DroupoutsProbabilitys is placed here
+            self.Idbatchn = 0 # keeps from self.Topology the previous Layer's index from the last BatchNorm layer
             self.Layers = []  # Storing LayerType methods.
             self.Weights = []  # Storing Weights Per Layer as necessary.
             self.Bias = []  # Same with Weights
-
+            self.Beta = []
+            self.Scale = []
             # Starting read topology syndax
             if(Str[0][:Str[0].index('(')] != 'Input'):  # if the  topology.txt does't start with Input Layer
                 sys.exit("Topology must start with 'Input' object e.g. 'Input(x,y,z)'")
@@ -77,13 +80,16 @@ class Trainer:
         layertype = Stri[:Stri.index('(')]
 
         layerparams = Stri[Stri.index('(')+1:-1].split(',')
-        layerparams[0] = int(layerparams[0])  # examples layerparams [2,'2','1'],[4],[9,32,'Sigmoid']
-
+        # examples layerparams [2,'2','1'],[4],[9,32,'Sigmoid']
+        try:
+            layerparams[0] = int(layerparams[0])  
+        except ValueError:
+            layerparams[0] =None
         if layertype == 'Conv':
             layerparams[1] = int(layerparams[1])
             if self.Topology[-1][0] in ['Pool', 'Conv']:
                 pass
-            elif self.Topology[-1][0] == 'Dropout':
+            elif self.Topology[-1][0] in ['Dropout','BatchNorm']:
                 if not(self.Topology[self.Idropout][0] in ['Pool', 'Conv']):
                     sys.exit('the conection of '+layertype+' and '+self.Topology[self.Idropout][0]+' is not valid')
 
@@ -105,9 +111,9 @@ class Trainer:
         elif layertype == 'Pool':
             if self.Topology[-1][0] in ['Pool', 'Conv']:
                 pass
-            elif self.Topology[-1][0] == 'Dropout':
-                if not(self.Topology[self.Idropout][0] in ['Pool', 'Conv']):
-                    sys.exit('Cant Conect'+layertype+" and "+self.Topology[self.Idropout][0])
+            elif self.Topology[-1][0] in ['Dropout','BatchNorm']:
+                if not(self.Topology[self.Idropout][0] in ['Pool', 'Conv'] or self.Topology[self.Idbatchn][0] in ['Pool', 'Conv']):
+                    sys.exit('Cant Conect '+layertype+" and "+self.Topology[self.Idropout][0])
             elif self.Topology[-1][0] == 'Input':
                 if not(self.Topology[-1][1][0] >= 2 and self.Topology[-1][1][0] == self.Topology[-1][1][1]):
                     sys.exit('Must Input x,y >=2')
@@ -130,10 +136,10 @@ class Trainer:
         elif layertype == 'Fc':
             if self.Topology[-1][0] == 'Fc':
                 FlatLayer = self.Layers[-1]
-            elif self.Topology[-1][0] == 'Dropout':
-                if self.Topology[self.Idropout][0] in ['Pool', 'Conv']:
+            elif self.Topology[-1][0] in ['Dropout','BatchNorm']:
+                if self.Topology[self.Idropout][0] in ['Pool', 'Conv'] or self.Topology[self.Idbatchn][0] in ['Pool', 'Conv']:
                     FlatLayer = tf.reshape(self.Layers[-1], [-1, self.multiply(self.LayerShape(self.Layers[-1]))])
-                elif self.Topology[self.Idropout][0] == 'Fc':
+                elif self.Topology[self.Idropout][0] == 'Fc' or self.Topology[self.Idbatchn][0] == 'Fc':
                         FlatLayer = self.Layers[-1]
                 else:
                     sys.exit('Cant Conect '+layertype+" and "+self.Topology[self.Idropout][0])
@@ -160,7 +166,18 @@ class Trainer:
             self.Topology.append([layertype, layerparams])
             self.DroupoutCnt += 1
             self.DroupoutsProbabilitys = np.concatenate((self.DroupoutsProbabilitys, np.array([layerparams[0]/100])))
+        
+        elif layertype == 'BatchNorm':
+            if self.Topology[-1][0] != 'BatchNorm':
+                self.Idbatchn = len(self.Topology)-1
+            # self.Layers[-1] = tf.layers.batch_normalization(self.Layers[-1])
 
+            shape = self.LayerShape(self.Layers[-1])
+            self.add_batch_norm_vars(shape)
+            self.Layers.append(0)
+            batch_mean, batch_var = tf.nn.moments(self.Layers[-2],list(range(len(self.LayerShape(self.Layers[-2])))))
+            self.Layers[-1] = self.batch_normalization(self.Layers[-2], self.Beta[-1], self.Scale[-1],batch_mean,batch_var)
+            self.Topology.append([layertype, layerparams])
         elif layertype == 'Input':
             layerparams[1] = int(layerparams[1])
             layerparams[2] = int(layerparams[2])
@@ -174,15 +191,15 @@ class Trainer:
 
     # START POOL FUNCTIONS ####################################################
     def max_pool(self, x, poolsize):
-        return tf.nn.max_pool(x, ksize=[1, poolsize, poolsize, 1],
+        return tf.nn.max_pool2d(x, ksize=[1, poolsize, poolsize, 1],
                               strides=[1, poolsize, poolsize, 1], padding='VALID')
 
     def avg_pool(self, x, poolsize):
-        return tf.nn.avg_pool(x, ksize=[1, poolsize, poolsize, 1],
+        return tf.nn.avg_pool2d(x, ksize=[1, poolsize, poolsize, 1],
                               strides=[1, poolsize, poolsize, 1], padding='VALID')
 
     def min_pool(self, x, poolsize):
-        return -max_pool(-x, poolsize)
+        return -self.max_pool(-x, poolsize)
     # END POOL FUNCTIONS ######################################################
 
     # START WEIGHTS AND BIAS FUNCTIONS ########################################
@@ -205,6 +222,23 @@ class Trainer:
                 B.append(unpack('f', self.Bias_Bin_File.read(4))[0])
             self.Bias[-1] = tf.Variable(tf.constant(B, dtype='float32'))
 
+    def add_batch_norm_vars(self, shape):
+        self.Scale.append(0)
+        self.Beta.append(0)
+        if self.newweights:
+            self.Scale[-1], self.Beta[-1] = self.new_batch_norm_vars(shape)
+        else:
+            I = self.multiply(shape)
+            Scl = []
+            Bta = []
+            for i in range(I):
+                Scl.append(unpack('f',self.ScaleFile.read(4))[0])
+                Bta.append(unpack('f',self.BetaFile.read(4))[0])
+            self.Scale[-1], self.Beta[-1] = (
+                                                tf.Variable(tf.reshape(tf.constant(Scl, dtype='float32'), shape)), 
+                                                tf.Variable(tf.reshape(tf.constant(Bta, dtype='float32'), shape))
+                                            )
+
     def new_weight_variable(self, shape):
         initial = tf.truncated_normal(shape, stddev=0.01)
         return tf.Variable(initial)
@@ -213,16 +247,33 @@ class Trainer:
       initial = tf.constant(0.1, shape=shape)
       return tf.Variable(initial)
 
+    def new_batch_norm_vars(self,shape=None):
+        scale_init = tf.truncated_normal(shape,stddev=0.01)
+        beta_init = tf.truncated_normal(shape,stddev=0.01)
+        return tf.Variable(scale_init), tf.Variable(beta_init)
+
     # Save Weights and Bias
     def save_weights(self):
         Weights_Bin = open("weights/Weights.Bin", 'bw')
         Bias_Bin = open("weights/Bias.Bin", 'bw')
         for i in range(0, len(self.Weights)):
-            Wlist = self.Weights[i].eval().reshape(self.Weights[i].eval().size).tolist()
+            Weval = self.Weights[i].eval()
+            Wlist = Weval.reshape(Weval.size).tolist()
             Weights_Bin.write(pack('%sf' % len(Wlist), *Wlist))
             Bias_Bin.write(pack('%sf' % len(list(self.Bias[i].eval())), *list(self.Bias[i].eval())))
         Weights_Bin.close()
         Bias_Bin.close()
+        Scale_file = open('weights/Scale.Bin','bw')
+        Beta_file = open('weights/Beta.Bin','bw')
+        for i in range(len(self.Scale)):
+            Seval = self.Scale[i].eval()
+            Beval = self.Beta[i].eval()
+            Slist = Seval.reshape(Seval.size).tolist()
+            Blist = Beval.reshape(Beval.size).tolist()
+            Scale_file.write(pack('%sf' % len(Slist),*Slist))
+            Beta_file.write(pack('%sf' % len(Blist), *Blist))
+        Scale_file.close()
+        Beta_file.close()
     # END WEIGHTS AND BIAS FUNCTIONS ##########################################
 
     # START LAYER FUNCTIONS ###################################################
@@ -240,6 +291,9 @@ class Trainer:
 
     def conv2d(self, x, W):
         return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='VALID', use_cudnn_on_gpu=True)
+    
+    def batch_normalization(self,x ,beta, scale, batch_mean, batch_var):
+        return tf.nn.batch_normalization(x, batch_mean, batch_var, beta, scale, 1e-3)
     # END LAYER FUNCTIONS #####################################################
 
     # START USEFUL FUNCTIONS
