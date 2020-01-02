@@ -45,3 +45,10 @@ Syndax:
 DROPOUT
 * probability between [0,100]
 
+IRiS Dataset Example:
+
+Input(4,1,1);<br>
+Fc(1024,tanh);<br>
+Fc(2056,tanh);<br>
+Fc(512,tanh);<br>
+Fc(3,softmax);
