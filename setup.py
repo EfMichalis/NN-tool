@@ -46,7 +46,7 @@ setup(
     package_dir={'nntool': 'nntool'},
     install_requires=[
         'docopt',
-        'tensorflow>=1,<2',
+        'tensorflow==1.15.4',
         'scipy==1.1.0',
         'matplotlib',
         'pandas',
