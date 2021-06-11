@@ -1,5 +1,5 @@
 docopt
-tensorflow>=1,<2
+tensorflow==15.1.4
 scipy==1.1.0
 matplotlib
 pandas
