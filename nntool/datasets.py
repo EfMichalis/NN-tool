@@ -4,8 +4,8 @@ from struct import *
 import os
 import urllib.request
 import matplotlib.image as mpimg
-# from scipy.misc import imresize
-from skimage.transform import resize
+from scipy.ndimage import convolve
+from scipy.signal import upfirdn
 import random
 class datasets:
     def __init__(self):
@@ -284,8 +284,7 @@ class datasets:
                 for D in DataList:
                     Class = int(D[0][-3:]) - 1
                     img = mpimg.imread(D[1])
-                    # img = imresize(img, (28, 28), 'bicubic')
-                    img = resize(img, (28,28), anti_aliasing=True)
+                    img = self.__resize(img, (28,28), sigma=0.2)
                     img = img.reshape(784).tolist()
                     BinWrite.write(pack('%sB' % 1, *[Class]))
                     BinWrite.write(pack('%sB' % 784, *img))
@@ -412,3 +411,18 @@ class datasets:
             iris_data.close()
             Set = ['Iris-setosa', 'Iris-versicolor', 'Iris-virginica']
             return TrainIm.reshape(N, 4, 1, 1), TrainLabel, TestIm.reshape(150-N, 4, 1, 1), TestLabel, Set
+
+
+    def __resize(self, image, newshape, sigma=1):
+        kernelsize = np.abs(image.shape[0] - newshape.shape[0]) + 1
+        if image.shape[0] < newshape[0]:
+            kernel = np.ones((kernelsize, kernelsize))
+            newimage = upfirdn(image, kernel)
+        else:
+            x = y = np.arange(0, kernelsize)
+            x, y = np.meshgrid(x, y)
+            kernel = np.exp(-np.linalg.norm(x-y,2)/(2*sigma**2))/(kernelsize*np.sqrt(2*np.pi*sigma**2))
+            newimage = convolve(image, kernel)
+
+        return newimage
+
