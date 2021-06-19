@@ -19,8 +19,8 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            python3 -m virtualenv -p=python3.8 venv;
-            . venv/bin/activate;
+            virtualenv -p python3.8 venv;
+            souerce venv/bin/activate;
             pip install --upgrade pip;
             pip install -r requirements.txt;
             pip install -e .
