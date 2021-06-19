@@ -52,3 +52,9 @@ jobs:
           command: |
             . venv/bin/activate
             python nntool/tests/test_simple.py
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - buld
