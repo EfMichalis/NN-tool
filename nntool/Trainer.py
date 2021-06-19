@@ -59,7 +59,7 @@ class Trainer:
             self.Idropout = 0  # keeps from self.Topology the previous Layer's index from the last Dropout layer
             self.DroupoutCnt = 0
             self.DroupoutsProbabilitys = np.array([])  # Storing for trainig processing
-            self.keep_prob = tf.placeholder(tf.float32)  # During the trainig processing, the DroupoutsProbabilitys is placed here
+            self.keep_prob = tf.compat.v1.placeholder(tf.float32)  # During the trainig processing, the DroupoutsProbabilitys is placed here
             self.Idbatchn = 0 # keeps from self.Topology the previous Layer's index from the last BatchNorm layer
             self.Layers = []  # Storing LayerType methods.
             self.Weights = []  # Storing Weights Per Layer as necessary.
@@ -74,7 +74,7 @@ class Trainer:
                     print(Str[i])
                     self.case(Str[i])
 
-        self.y_ = tf.placeholder(tf.float32, shape=[None, self.LayerShape(self.Layers[-1])[-1]])  # Here placed the true classes ,the Layers[-1] is the classes that were predicted
+        self.y_ = tf.compat.v1.placeholder(tf.float32, shape=[None, self.LayerShape(self.Layers[-1])[-1]])  # Here placed the true classes ,the Layers[-1] is the classes that were predicted
 
     def case(self, Stri):
         layertype = Stri[:Stri.index('(')]
@@ -82,9 +82,13 @@ class Trainer:
         layerparams = Stri[Stri.index('(')+1:-1].split(',')
         # examples layerparams [2,'2','1'],[4],[9,32,'Sigmoid']
         try:
-            layerparams[0] = int(layerparams[0])  
+            layerparams[0] = int(layerparams[0])
+
         except ValueError:
-            layerparams[0] =None
+            try:
+                layerparams[0] = float(layerparams[0])
+            except ValueError:
+                layerparams[0] =None
         if layertype == 'Conv':
             layerparams[1] = int(layerparams[1])
             if self.Topology[-1][0] in ['Pool', 'Conv']:
@@ -162,10 +166,10 @@ class Trainer:
             if self.Topology[-1][0] != 'Dropout':
                 self.Idropout = len(self.Topology)-1
             # keep_prob=tf.Variable(tf.constant(layerparams[0]/100,dtype='float32'))
-            self.Layers[-1] = tf.nn.dropout(self.Layers[-1], tf.gather(self.keep_prob, [self.DroupoutCnt]))
+            self.Layers[-1] = tf.compat.v1.nn.dropout(self.Layers[-1], tf.gather(self.keep_prob, [self.DroupoutCnt]))
             self.Topology.append([layertype, layerparams])
             self.DroupoutCnt += 1
-            self.DroupoutsProbabilitys = np.concatenate((self.DroupoutsProbabilitys, np.array([layerparams[0]/100])))
+            self.DroupoutsProbabilitys = np.concatenate([self.DroupoutsProbabilitys, np.array([layerparams[0]])],axis=0)
         
         elif layertype == 'BatchNorm':
             if self.Topology[-1][0] != 'BatchNorm':
@@ -182,7 +186,7 @@ class Trainer:
             layerparams[1] = int(layerparams[1])
             layerparams[2] = int(layerparams[2])
             self.Layers.append(0)
-            self.Layers[-1] = tf.placeholder(tf.float32, shape=[None, layerparams[0], layerparams[1], layerparams[2]])
+            self.Layers[-1] = tf.compat.v1.placeholder(tf.float32, shape=[None, layerparams[0], layerparams[1], layerparams[2]])
             self.Topology.append([layertype, layerparams])
             self.Hi = layerparams[0]
 
@@ -240,16 +244,16 @@ class Trainer:
                                             )
 
     def new_weight_variable(self, shape):
-        initial = tf.truncated_normal(shape, stddev=0.01)
+        initial = tf.random.truncated_normal(shape, stddev=1e-4)
         return tf.Variable(initial)
 
     def new_bias_variable(self, shape):
-      initial = tf.constant(0.1, shape=shape)
+      initial = tf.constant(0.0, shape=shape)
       return tf.Variable(initial)
 
     def new_batch_norm_vars(self,shape=None):
-        scale_init = tf.truncated_normal(shape,stddev=0.01)
-        beta_init = tf.truncated_normal(shape,stddev=0.01)
+        scale_init = tf.random.truncated_normal(shape,stddev=1e-4)
+        beta_init = tf.random.truncated_normal(shape,stddev=1e-4)
         return tf.Variable(scale_init), tf.Variable(beta_init)
 
     # Save Weights and Bias
@@ -287,10 +291,10 @@ class Trainer:
         elif Type == 'softmax':
             self.Layers[-1] = tf.nn.softmax(self.Layers[-1])
         elif Type != 'linear':
-            sys.exit(layerparams[-1]+' is not valid activation fanction')
+            sys.exit(Type+' is not valid activation fanction')
 
     def conv2d(self, x, W):
-        return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='VALID', use_cudnn_on_gpu=True)
+        return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='VALID')
     
     def batch_normalization(self,x ,beta, scale, batch_mean, batch_var):
         return tf.nn.batch_normalization(x, batch_mean, batch_var, beta, scale, 1e-3)
@@ -331,10 +335,11 @@ class Trainer:
         self.Set_Names = set_data_names
 
     def SetSession(self):
-        self.sess = tf.InteractiveSession()
+        self.sess = tf.compat.v1.InteractiveSession()
 
     def Initialize_Vars(self):
-        self.sess.run(tf.global_variables_initializer())
+        self.sess.run(tf.compat.v1.global_variables_initializer()
+)
     # END USEFUL FUNCTIONS
 
     # START TRAIN #############################################################
@@ -343,21 +348,22 @@ class Trainer:
     # TrCMatrix    :boolean for Train Confusion Matrix
     # TsCMatrix    :boolean for Test Confusion Matrix
     # test_predict :boolean for Test eval
-    def TRAIN(self, Epochs, BatchSize, Te=1, test_predict=True, Tb=40, trainrate=1e-4, TrCMatrix=True, TsCMatrix=True,regularization=False):
+    def TRAIN(self, Epochs, BatchSize, Te=1, test_predict=True, Tb=40, trainrate=1e-4, TrCMatrix=False, TsCMatrix=False, regularization=False):
         if self.Test_Data is None or self.Test_Hot is None:
             test_predict = False
             TsCMatrix = False
         if Te == 0:
             test_predict = False
         if self.NetworkNewTrainig:
-            CE = tf.reduce_mean(-tf.reduce_sum(self.y_*tf.log(self.Layers[-1]+1e-12), reduction_indices=[1]))
+            print(self.DroupoutsProbabilitys)
+            CE = tf.reduce_mean(-tf.compat.v1.reduce_sum(self.y_*tf.compat.v1.log(self.Layers[-1]+1e-12), reduction_indices=[1]))
             ### l-2 ####
             reg = 0
             if regularization:
                 for W in self.Weights:
                     reg += tf.nn.l2_loss(W)
-            CE = tf.reduce_mean(CE+0.01*reg)
-            self.opt = tf.train.AdamOptimizer(learning_rate=trainrate)
+            CE = CE+0.01*reg
+            self.opt = tf.compat.v1.train.AdamOptimizer(learning_rate=trainrate)
             self.train_step = self.opt.minimize(CE)
             self.Initialize_Vars()
             print("#############################################")
@@ -465,7 +471,8 @@ class Trainer:
         return Total_Accuracy
 
     def LOSS(self, DATA, LABELS):
-        CE = tf.reduce_mean(-tf.reduce_sum(self.y_ * tf.log(self.Layers[-1]+1e-12), reduction_indices=[1]))
+        CE = tf.reduce_mean(-tf.compat.v1.reduce_sum(self.y_*tf.compat.v1.log(self.Layers[-1]+1e-12), reduction_indices=[1]))
+
         if DATA.shape[0] < 1000:
             return CE.eval(feed_dict={
                 self.Layers[0]: DATA ,
@@ -581,7 +588,7 @@ class Trainer:
             plt.show()
 
     # prints maximum three plots with Train Loss-Accuracy, Test Loss-Accuracy, Batch Loss-Accuracy
-    def DictDataPlot(self, PlotList=['train', 'test', 'batch']):
+    def DictDataPlot(self, PlotList:list=['train', 'test', 'batch']):
         fig = plt.figure()
         Ax = []
         i = 0  # plot counter

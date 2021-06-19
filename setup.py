@@ -47,7 +47,8 @@ setup(
     install_requires=[
         'docopt',
         'tensorflow',
-        'scipy==1.1.0',
+        'tensorflow-datasets',
+        'scipy',
         'matplotlib',
         'pandas',
         'scikit-image',

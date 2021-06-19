@@ -4,7 +4,8 @@ from struct import *
 import os
 import urllib.request
 import matplotlib.image as mpimg
-from scipy.misc import imresize
+# from scipy.misc import imresize
+from skimage.transform import resize
 import random
 class datasets:
     def __init__(self):
@@ -31,7 +32,7 @@ class datasets:
 
     # MNIST ###### 60000 Trains sample 10000 Test samples
     def __mnist_download(self, get=True):
-        if(not(os.path.exists('.DATASETS/MNIST'))):
+        if(not(os.path.exists('./DATASETS/MNIST'))):
             print("Download Train Images")
             urllib.request.urlretrieve(
                 "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
@@ -53,22 +54,22 @@ class datasets:
                 "t10k-labels-idx1-ubyte.gz"
             )
             print("Download complete")
-            print("Create .DATASETS/MNIST folder")
-            os.system('mkdir .DATASETS/MNIST')
+            print("Create ./DATASETS/MNIST folder")
+            os.system('mkdir ./DATASETS/MNIST')
 
             print("decompress MNIST Dataset")
-            Decom = "mv *.gz .DATASETS/MNIST ; "
-            Decom += "gzip -d .DATASETS/MNIST/*.gz"
+            Decom = "mv *.gz ./DATASETS/MNIST ; "
+            Decom += "gzip -d ./DATASETS/MNIST/*.gz"
             os.system(Decom)
 
-            Rename = "mv .DATASETS/MNIST/train-images-idx3-ubyte" \
-                    " .DATASETS/MNIST/TrainImages.bin ;"
-            Rename += " mv .DATASETS/MNIST/train-labels-idx1-ubyte" \
-                    " .DATASETS/MNIST/TrainLabels.bin ;"
-            Rename += " mv .DATASETS/MNIST/t10k-images-idx3-ubyte" \
-                    " .DATASETS/MNIST/TestImages.bin ;"
-            Rename += " mv .DATASETS/MNIST/t10k-labels-idx1-ubyte" \
-                    " .DATASETS/MNIST/TestLabels.bin"
+            Rename = "mv ./DATASETS/MNIST/train-images-idx3-ubyte" \
+                    " ./DATASETS/MNIST/TrainImages.bin ;"
+            Rename += " mv ./DATASETS/MNIST/train-labels-idx1-ubyte" \
+                    " ./DATASETS/MNIST/TrainLabels.bin ;"
+            Rename += " mv ./DATASETS/MNIST/t10k-images-idx3-ubyte" \
+                    " ./DATASETS/MNIST/TestImages.bin ;"
+            Rename += " mv ./DATASETS/MNIST/t10k-labels-idx1-ubyte" \
+                    " ./DATASETS/MNIST/TestLabels.bin"
             os.system(Rename)
         else:
             print('MNIST data set exist')
@@ -77,19 +78,19 @@ class datasets:
 
 
     def mnist(self, trn=60000, tsn=10000):
-        if(not(os.path.exists('.DATASETS/MNIST'))):
+        if(not(os.path.exists('./DATASETS/MNIST'))):
             print('MNIST data set dont exist\n Download MNIST data-set')
             return self.__mnist_download(get=True)
         else:
-            TrainImagePath = ".DATASETS/MNIST/TrainImages.bin"
-            TrainLabelPath = ".DATASETS/MNIST/TrainLabels.bin"
+            TrainImagePath = "./DATASETS/MNIST/TrainImages.bin"
+            TrainLabelPath = "./DATASETS/MNIST/TrainLabels.bin"
             # 1 <= trainNumb <= 60000
             Numb = trn
             TrainIm, TrainLabel = self.__getform28x28binfile(
                 Numb, TrainLabelPath, TrainImagePath)
 
-            TestImagePath = ".DATASETS/MNIST/TestImages.bin"
-            TestLabelPath = ".DATASETS/MNIST/TestLabels.bin"
+            TestImagePath = "./DATASETS/MNIST/TestImages.bin"
+            TestLabelPath = "./DATASETS/MNIST/TestLabels.bin"
             # 1 <= testNumb <= 10000
             Numb = tsn
             TestIm, TestLabel = self.__getform28x28binfile(
@@ -99,7 +100,7 @@ class datasets:
 
     #FASHION_MNIST ###### 60000 Trains sample 10000 Test samples
     def __download_fashion_mnist(self, get=True):
-        if(not(os.path.exists(".DATASETS/FASHION_MNIST"))):
+        if(not(os.path.exists("./DATASETS/FASHION_MNIST"))):
             print("Download Train images")
             urllib.request.urlretrieve(
                 "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz",
@@ -121,21 +122,21 @@ class datasets:
                 "t10k-labels-idx1-ubyte.gz"
             )
             print("Download Complete")
-            print("Create .DATASETS/FASHION_MNIST folder")
-            os.system('mkdir .DATASETS/FASHION_MNIST')
+            print("Create ./DATASETS/FASHION_MNIST folder")
+            os.system('mkdir ./DATASETS/FASHION_MNIST')
             print("decompress FASHION_MNIST Dataset")
-            Decom = "mv *.gz .DATASETS/FASHION_MNIST ; "
-            Decom += "gzip -d .DATASETS/FASHION_MNIST/*.gz"
+            Decom = "mv *.gz ./DATASETS/FASHION_MNIST ; "
+            Decom += "gzip -d ./DATASETS/FASHION_MNIST/*.gz"
             os.system(Decom)
 
-            Rename = "mv .DATASETS/FASHION_MNIST/train-images-idx3-ubyte" \
-                    " .DATASETS/FASHION_MNIST/TrainImages.bin ;"
-            Rename += " mv .DATASETS/FASHION_MNIST/train-labels-idx1-ubyte" \
-                    " .DATASETS/FASHION_MNIST/TrainLabels.bin ;"
-            Rename += " mv .DATASETS/FASHION_MNIST/t10k-images-idx3-ubyte" \
-                    " .DATASETS/FASHION_MNIST/TestImages.bin ;"
-            Rename += " mv .DATASETS/FASHION_MNIST/t10k-labels-idx1-ubyte" \
-                    " .DATASETS/FASHION_MNIST/TestLabels.bin"
+            Rename = "mv ./DATASETS/FASHION_MNIST/train-images-idx3-ubyte" \
+                    " ./DATASETS/FASHION_MNIST/TrainImages.bin ;"
+            Rename += " mv ./DATASETS/FASHION_MNIST/train-labels-idx1-ubyte" \
+                    " ./DATASETS/FASHION_MNIST/TrainLabels.bin ;"
+            Rename += " mv ./DATASETS/FASHION_MNIST/t10k-images-idx3-ubyte" \
+                    " ./DATASETS/FASHION_MNIST/TestImages.bin ;"
+            Rename += " mv ./DATASETS/FASHION_MNIST/t10k-labels-idx1-ubyte" \
+                    " ./DATASETS/FASHION_MNIST/TestLabels.bin"
             os.system(Rename)
         else:
             print('FASHION_MNIST data set exist')
@@ -144,19 +145,19 @@ class datasets:
 
 
     def fashion_mnist(self, trn=60000, tsn=10000):
-        if(not(os.path.exists('.DATASETS/FASHION_MNIST'))):
+        if(not(os.path.exists('./DATASETS/FASHION_MNIST'))):
             print('FASHION_MNIST data set dont exist\nDownload FASHION_MNIST data-set')
             return self.__download_fashion_mnist(get=True)
         else:
-            TrainImagePath = ".DATASETS/FASHION_MNIST/TrainImages.bin"
-            TrainLabelPath = ".DATASETS/FASHION_MNIST/TrainLabels.bin"
+            TrainImagePath = "./DATASETS/FASHION_MNIST/TrainImages.bin"
+            TrainLabelPath = "./DATASETS/FASHION_MNIST/TrainLabels.bin"
             # 1 <= trainNumb <= 60000
             Numb = trn
             TrainIm, TrainLabel = self.__getform28x28binfile(
                 Numb, TrainLabelPath, TrainImagePath)
 
-            TestImagePath = ".DATASETS/FASHION_MNIST/TestImages.bin"
-            TestLabelPath = ".DATASETS/FASHION_MNIST/TestLabels.bin"
+            TestImagePath = "./DATASETS/FASHION_MNIST/TestImages.bin"
+            TestLabelPath = "./DATASETS/FASHION_MNIST/TestLabels.bin"
             # 1 <= testNumb <= 10000
             Numb = tsn
             TestIm, TestLabel = self.__getform28x28binfile(
@@ -169,7 +170,7 @@ class datasets:
 
     # CIFAR-10
     def __cifar10_download(self, get=True):
-        if(not(os.path.exists('.DATASETS/CIFAR-10'))):
+        if(not(os.path.exists('./DATASETS/CIFAR-10'))):
             print("download CIFAR-10")
             urllib.request.urlretrieve(
                 "https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz",
@@ -183,7 +184,7 @@ class datasets:
             os.system(Decom)
 
             print("Move CIFAR-10 to NN-tool/DATASETS")
-            os.system("mv cifar-10-batches-bin CIFAR-10; mv CIFAR-10 .DATASETS/")
+            os.system("mv cifar-10-batches-bin CIFAR-10; mv CIFAR-10 ./DATASETS/")
         else:
             print('CIFAR-10 dataset exists')
         if get:
@@ -191,7 +192,7 @@ class datasets:
 
 
     def cifar10(self, trn=50000, tsn=10000):
-        if(not(os.path.exists('.DATASETS/CIFAR-10'))):
+        if(not(os.path.exists('./DATASETS/CIFAR-10'))):
             print('CIFAR-10 dataset dont exist')
             return self.__cifar10_download(get=True)
         else:
@@ -232,7 +233,7 @@ class datasets:
                 "truck"]
             # 1 <= trainNumb <= 50000
             Numb = trn
-            BinFile = ".DATASETS/CIFAR-10/data_batch_0.bin"
+            BinFile = "./DATASETS/CIFAR-10/data_batch_0.bin"
             I = int(np.ceil(Numb / 10000))
             TrainIm = np.zeros((1, 32, 32, 3))
             TrainLabel = np.zeros((1, 10))
@@ -248,14 +249,14 @@ class datasets:
             TrainLabel = TrainLabel[1:TrainLabel.shape[0], :]
             # 1 <= TestNumb <= 10000
             Numb = tsn
-            BinFile = ".DATASETS/CIFAR-10/test_batch.bin"
+            BinFile = "./DATASETS/CIFAR-10/test_batch.bin"
             print('Read Test file')
             TestIm, TestLabel = cifar10set_data_and_labels(Numb, BinFile)
             return TrainIm, TrainLabel, TestIm, TestLabel, Set
 
 
     def __chars74k_num_caps_fonts_download(self, get=True):
-        if(not(os.path.exists('.DATASETS/CHARS74K_NUM_CAPS_FONTS'))):
+        if(not(os.path.exists('./DATASETS/CHARS74K_NUM_CAPS_FONTS'))):
             print("Download CHARS74K fonts")
             urllib.request.urlretrieve(
                 "http://www.ee.surrey.ac.uk/CVSSP/demos/chars74k/EnglishFnt.tgz",
@@ -283,7 +284,8 @@ class datasets:
                 for D in DataList:
                     Class = int(D[0][-3:]) - 1
                     img = mpimg.imread(D[1])
-                    img = imresize(img, (28, 28), 'bicubic')
+                    # img = imresize(img, (28, 28), 'bicubic')
+                    img = resize(img, (28,28), anti_aliasing=True)
                     img = img.reshape(784).tolist()
                     BinWrite.write(pack('%sB' % 1, *[Class]))
                     BinWrite.write(pack('%sB' % 784, *img))
@@ -292,8 +294,8 @@ class datasets:
                 ' NN-tool/DATASETS/CHARS74K_NUM_CAPS_FONTS'
             )
             os.system(
-                'rm -rf English ; mkdir .DATASETS/CHARS74K_NUM_CAPS_FONTS ;' /
-                ' mv CHARS74K_NUM_CAPS_FONTS.bin .DATASETS/CHARS74K_NUM_CAPS_FONTS'
+                'rm -rf English ; mkdir ./DATASETS/CHARS74K_NUM_CAPS_FONTS ;' /
+                ' mv CHARS74K_NUM_CAPS_FONTS.bin ./DATASETS/CHARS74K_NUM_CAPS_FONTS'
             )
         else:
             print('CHARS74K_NUM_CAPS_FONTS dataset exists')
@@ -303,11 +305,11 @@ class datasets:
 
 
     def chars74k_num_caps_fonts(self, trn=36576):
-        if(not(os.path.exists('.DATASETS/CHARS74K_NUM_CAPS_FONTS'))):
+        if(not(os.path.exists('./DATASETS/CHARS74K_NUM_CAPS_FONTS'))):
             print('CHARS74K_NUM_CAPS_FONTS dataset doesnt exist')
             return self.__chars74k_num_caps_fonts_download()
         else:
-            Path = '.DATASETS/CHARS74K_NUM_CAPS_FONTS/CHARS74K_NUM_CAPS_FONTS.bin'
+            Path = './DATASETS/CHARS74K_NUM_CAPS_FONTS/CHARS74K_NUM_CAPS_FONTS.bin'
             RDataSet = open(Path, 'br')
             TrainIm = np.zeros((trn, 28, 28, 1))
             TrainLabel = np.zeros((trn, 36))
@@ -340,7 +342,7 @@ class datasets:
 
     # IRIS DATASET 150 Examples
     def __iris_download(self, get=True):
-        if(not(os.path.exists('.DATASETS/IRIS'))):
+        if(not(os.path.exists('./DATASETS/IRIS'))):
             print('Download IRIS dataset')
             urllib.request.urlretrieve(
                 "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data",
@@ -373,8 +375,8 @@ class datasets:
                     ar2li = AR[i].tolist()
                     IRIS_DATA.write(pack('%4sf' % len(ar2li), *ar2li))
             os.system(
-                'mkdir .DATASETS/IRIS;' \
-                ' mv IRIS_DATA.bin .DATASETS/IRIS/;' \
+                'mkdir ./DATASETS/IRIS;' \
+                ' mv IRIS_DATA.bin ./DATASETS/IRIS/;' \
                 ' rm iris.data'
             )
         else:
@@ -384,7 +386,7 @@ class datasets:
 
 
     def iris(self, trn=120):
-        if(not(os.path.exists('.DATASETS/IRIS'))):
+        if(not(os.path.exists('./DATASETS/IRIS'))):
             print('IRIS dataset doesnt exist')
             return self.__iris_download(get=True)
         else:
@@ -392,7 +394,7 @@ class datasets:
             N = trn
             # Testing samples 150-N
             a = np.arange(3)
-            iris_data = open('.DATASETS/IRIS/IRIS_DATA.bin', 'br')
+            iris_data = open('./DATASETS/IRIS/IRIS_DATA.bin', 'br')
 
             TrainIm = np.zeros((N, 4))
             TrainLabel = np.zeros((N, 3))
