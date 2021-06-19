@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/EfMichalis/NN-Tool.svg?style=svg)](https://circleci.com/gh/EfMichalis/NN-Tool)
+[![CircleCI](https://circleci.com/gh/efthymis-mcl/NN-Tool.svg?style=shield)](https://circleci.com/gh/efthymis-mcl/NN-Tool)
 
 # nntool
 ## Artificial Neural Network(ANN) Freamwork in python3 to read ANN topology from txt file
