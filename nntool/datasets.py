@@ -7,7 +7,10 @@ import matplotlib.image as mpimg
 from scipy.ndimage import convolve
 from scipy.signal import upfirdn
 import random
-class datasets:
+
+
+
+class Datasets(object):
     def __init__(self):
         pass
 
@@ -414,7 +417,7 @@ class datasets:
 
 
     def __resize(self, image, newshape, sigma=1):
-        kernelsize = np.abs(image.shape[0] - newshape.shape[0]) + 1
+        kernelsize = np.abs(image.shape[0] - newshape[0]) + 1
         if image.shape[0] < newshape[0]:
             kernel = np.ones((kernelsize, kernelsize))
             newimage = upfirdn(image, kernel)
@@ -426,3 +429,36 @@ class datasets:
 
         return newimage
 
+
+    @classmethod
+    def resize(cls, image, newshape, sigma=1):
+        return cls().__resize(image, newshape, sigma)
+
+
+class MnistChars74k(Datasets):
+    def __int__(self):
+        super(MnistChars74k, self).__init__()
+
+    def get_dataset(self):
+        mnist_train_examples, mnist_train_labels, mnist_val_examples, mnist_val_labels, _ = self.mnist()
+        ch74k_train_examples, ch74k_train_labels, ch74k_val_examples, ch74k_val_labels, ch74k_set_names = self.chars74k_num_caps_fonts()
+
+        mnist_train_labels = np.concatenate((mnist_train_labels, np.zeros((mnist_train_labels.shape[0], 26))), axis=1)
+        mnist_val_labels = np.concatenate((mnist_val_labels, np.zeros((mnist_val_labels.shape[0], 26))), axis=1)
+
+        train_examples = np.concatenate([mnist_train_examples, ch74k_train_examples], axis=0)
+        train_labels = np.concatenate([mnist_train_labels, ch74k_train_labels], axis=0)
+        val_examples = np.concatenate([mnist_val_examples, ch74k_val_examples], axis=0)
+        val_labels = np.concatenate([mnist_val_labels, ch74k_val_labels], axis=0)
+
+        n_train = train_examples.shape[0]
+        train_rnd_idx = np.random.choice(np.arange(0, n_train), replace=False, size=(1, n_train)).reshape(n_train)
+        train_examples = train_examples[train_rnd_idx]
+        train_labels = train_labels[train_rnd_idx]
+
+        n_val = val_examples.shape[0]
+        val_rnd_idx = np.random.choice(np.arange(0, n_val), replace=False, size=(1, n_val)).reshape(n_val)
+        val_examples = val_examples[val_rnd_idx]
+        val_labels = val_labels[val_rnd_idx]
+
+        return train_examples, train_labels, val_examples, val_labels, ch74k_set_names

@@ -4,30 +4,27 @@ import os
 import sys
 from pandas import DataFrame as DF
 import csv
-# from nntool.datasets import *
 import tensorflow as tf
 import time
 from inspect import stack as InStack
 import numpy as np
-# START CLASS
 
 
 class Trainer:
-    def __init__(self, topology_file, newweights=True):
+    def __init__(self, topology_file, weights_path=None):
         self.prdir = None
         dirq = InStack()[1][1][:-6]
-        self.buildnet(topology_file, newweights)
+        self.buildnet(topology_file, weights_path)
 
-    def buildnet(self, topology_file, newweights=True):
+    def buildnet(self, topology_file, weights_path=None):
             self.topology_file = topology_file
-            self.newweights = newweights
+            self.weights_path = weights_path
             self.NetworkNewTrainig = True  # if True -> set default parameters in optimization algorithm (e.g learnig rate)
-            if os.system('ls weights/*.Bin') == 512:  # 512 -> False -> Not Find Weigts In Topology Directory
-                self.newweights = True
+            if weights_path is None:
                 print('Not Find Weight and Bias .Bin files.')
                 print('New Weight and Bias .Bin files.')
             else:
-                if self.newweights:
+                if self.weights_path is None:
                     print('Weight and Bias .Bin allready exist')
                     print('Do you want to overwright?\nNo : 0\nYes : 1')
                     Ans = input()
@@ -35,18 +32,21 @@ class Trainer:
                         print('No : 0\nYes : 1')
                         Ans = input()
                     if Ans == "0":
-                        self.newweights = False
+                        pass
 
-            if not self.newweights:
+            if self.weights_path is not None:
                 # Open Weights Binary Files
-                self.Weights_Bin_File = open('weights/Weights.Bin', 'br')
-                self.Bias_Bin_File = open('weights/Bias.Bin', 'br')
-                self.ScaleFile = open('weights/Scale.Bin','br')
-                self.BetaFile = open('weights/Beta.Bin','br')
+                try:
+                    self.Weights_Bin_File = open('{}/weights.bin'.format(self.weights_path), 'br')
+                    self.Bias_Bin_File = open('{}/bias.bin'.format(self.weights_path), 'br')
+                    self.ScaleFile = open('{}/scale.bin'.format(self.weights_path), 'br')
+                    self.BetaFile = open('{}/beta.bin'.format(self.weights_path), 'br')
+                except Exception as e:
+                    pass
             if os.system('ls '+self.topology_file) == 512:
                 sys.exit("Not find topology.txt file")
             self.readfile()
-            if(self.newweights == False):
+            if self.weights_path is not None:
                 self.Weights_Bin_File.close()
                 self.Bias_Bin_File.close()
 
@@ -210,7 +210,7 @@ class Trainer:
     def add_weights(self, shape):
         self.Weights.append(0)
         self.Bias.append(0)
-        if self.newweights:
+        if self.weights_path is None:
             self.Weights[-1] = self.new_weight_variable(shape)
             self.Bias[-1] = self.new_bias_variable([shape[-1]])
         else:
@@ -229,7 +229,7 @@ class Trainer:
     def add_batch_norm_vars(self, shape):
         self.Scale.append(0)
         self.Beta.append(0)
-        if self.newweights:
+        if self.weights_path is None:
             self.Scale[-1], self.Beta[-1] = self.new_batch_norm_vars(shape)
         else:
             I = self.multiply(shape)
@@ -258,26 +258,29 @@ class Trainer:
 
     # Save Weights and Bias
     def save_weights(self):
-        Weights_Bin = open("weights/Weights.Bin", 'bw')
-        Bias_Bin = open("weights/Bias.Bin", 'bw')
-        for i in range(0, len(self.Weights)):
-            Weval = self.Weights[i].eval()
-            Wlist = Weval.reshape(Weval.size).tolist()
-            Weights_Bin.write(pack('%sf' % len(Wlist), *Wlist))
-            Bias_Bin.write(pack('%sf' % len(list(self.Bias[i].eval())), *list(self.Bias[i].eval())))
-        Weights_Bin.close()
-        Bias_Bin.close()
-        Scale_file = open('weights/Scale.Bin','bw')
-        Beta_file = open('weights/Beta.Bin','bw')
-        for i in range(len(self.Scale)):
-            Seval = self.Scale[i].eval()
-            Beval = self.Beta[i].eval()
-            Slist = Seval.reshape(Seval.size).tolist()
-            Blist = Beval.reshape(Beval.size).tolist()
-            Scale_file.write(pack('%sf' % len(Slist),*Slist))
-            Beta_file.write(pack('%sf' % len(Blist), *Blist))
-        Scale_file.close()
-        Beta_file.close()
+        try:
+            Weights_Bin = open('{}/weights.bin'.format(self.weights_path), 'bw')
+            Bias_Bin = open("{}/bias.bin".format(self.weights_path), 'bw')
+            for i in range(0, len(self.Weights)):
+                Weval = self.Weights[i].eval()
+                Wlist = Weval.reshape(Weval.size).tolist()
+                Weights_Bin.write(pack('%sf' % len(Wlist), *Wlist))
+                Bias_Bin.write(pack('%sf' % len(list(self.Bias[i].eval())), *list(self.Bias[i].eval())))
+            Weights_Bin.close()
+            Bias_Bin.close()
+            Scale_file = open('{}/scale.bin'.format(self.weights_path),'bw')
+            Beta_file = open('{}/beta.bin'.format(self.weights_path),'bw')
+            for i in range(len(self.Scale)):
+                Seval = self.Scale[i].eval()
+                Beval = self.Beta[i].eval()
+                Slist = Seval.reshape(Seval.size).tolist()
+                Blist = Beval.reshape(Beval.size).tolist()
+                Scale_file.write(pack('%sf' % len(Slist),*Slist))
+                Beta_file.write(pack('%sf' % len(Blist), *Blist))
+            Scale_file.close()
+            Beta_file.close()
+        except FileNotFoundError:
+            pass
     # END WEIGHTS AND BIAS FUNCTIONS ##########################################
 
     # START LAYER FUNCTIONS ###################################################

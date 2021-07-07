@@ -1,5 +1,5 @@
 import unittest
-from nntool.Trainer import *
+from nntool.trainer import *
 from nntool.datasets import *
 
 class TestTrainer(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestTrainer(unittest.TestCase):
     def test_trainer_train(self):
         tf.compat.v1.disable_eager_execution()
         trainer = Trainer('top.txt')
-        dsets = datasets()
+        dsets = Datasets()
         Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names = dsets.mnist()
 
         trainer.SetData(Train_Examples, Train_Labels, Test_Examples, Test_Labels, Set_Names)

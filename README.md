@@ -3,6 +3,12 @@
 # nntool
 ## Artificial Neural Network(ANN) Freamwork in python3 to read ANN topology from txt file
 
+### Disclaimer:
+This repo is part of the undergraduate thesis of Mr. Efthymis Michalis.
+The thesis was developed under the supervision of Assistant Prof. Aggelos
+Pikrakis, in the Department of Informatics, School of ICT, University of
+Piraeus, Greece.
+
 * #### Package Requirements
   1. docopt
   2. tensorflow
